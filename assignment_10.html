@@ -38,40 +38,155 @@
     </div>
   </div>
   <hr/>
-  <button type="button" class="btn btn-success start_game_btn" aria-label="Left Align">
-    Start Game
-  </button>
+  
   <div class='container game_container'>
-    <div class='container button_container'>
-      <button class='btn btn-lg btn-info'>1</button>
-      <button class='btn btn-lg btn-info'>2</button>
-      <button class='btn btn-lg btn-info'>3</button>
-      <button class='btn btn-lg btn-info'>4</button>
-      <button class='btn btn-lg btn-info'>5</button>
-      <button class='btn btn-lg btn-info'>6</button>
-      <button class='btn btn-lg btn-info'>7</button>
-      <button class='btn btn-lg btn-info'>8</button>
-      <button class='btn btn-lg btn-info'>9</button>
-      <button class='btn btn-lg btn-info'>10</button>
+    <div class='offer_container'>
+      <span>
+        Offer
+      </span>
+      <input type='textbox' readonly></input>
     </div>
+    <div class='container button_container'>
+      <button class='btn btn-lg btn-info' disabled>1</button>
+      <button class='btn btn-lg btn-info' disabled>2</button>
+      <button class='btn btn-lg btn-info' disabled>3</button>
+      <button class='btn btn-lg btn-info' disabled>4</button>
+      <button class='btn btn-lg btn-info' disabled>5</button>
+      <button class='btn btn-lg btn-info' disabled>6</button>
+      <button class='btn btn-lg btn-info' disabled>7</button>
+      <button class='btn btn-lg btn-info' disabled>8</button>
+      <button class='btn btn-lg btn-info' disabled>9</button>
+      <button class='btn btn-lg btn-info' disabled>10</button>
+    </div>
+
+    <div class='checkbox_container' >
+      <input type='checkbox' disabled id='first'>$0.01</input><br>
+      <input type='checkbox' disabled id='1'>$1</input><br>
+      <input type='checkbox' disabled id='5'>$5</input><br>
+      <input type='checkbox' disabled id='10'>$10</input><br>
+      <input type='checkbox' disabled id='100'>$100</input><br>
+      <input type='checkbox' disabled id='1000'>$1000</input><br>
+      <input type='checkbox' disabled id='10000'>$10000</input><br>
+      <input type='checkbox' disabled id='100000'>$100000</input><br>
+      <input type='checkbox' disabled id='500000'>$500000</input><br>
+      <input type='checkbox' disabled id='1000000'>$1000000</input><br>
+    </div>
+    <div class='clear'></div>
+    <div class='action_btn_container'>
+      <button type="button" class="btn btn-info deal_btn" aria-label="Left Align" disabled>
+        Deal
+      </button>
+
+      <button type="button" class="btn btn-success start_game_btn" aria-label="Left Align">
+        Start Game
+      </button>
+      </div>
+
   </div>
 </body>
   <script>
-    $(document).on('ready', function() { $('.game_container').hide(); })
+    $(function() {
+      var values = [0.01, 1, 5, 10, 100, 1000, 10000, 100000, 500000, 1000000]; 
+      var total_value = 0;
+      
+      $.each(values, function(index) {
+        total_value = total_value + values[index];
+      });
 
-    $(document).on('click', '.start_game_btn', function() {
-      $('.instructions_container').hide('slow');
-      $(this).hide('slow');
-      $('.game_container').show('slow');
+      var assign_values = function() {  
+        var internal_values = [0.01, 1, 5, 10, 100, 1000, 10000, 100000, 500000, 1000000]; 
+        var array_index, value = 0;
+        var buttons = $('.button_container > .btn');
+        buttons.each(function(index) {
+          array_index = Math.floor((Math.random() * (8 - index)) + 1);
+          value = internal_values[array_index];
+          $(buttons[index]).data('assigned_value', value);
+          internal_values.splice(array_index, 1);
+        });
+      }
+
+      $(document).on('click', '.btn-lg', function() {
+        var $first_button = $('.btn-lg.first_button');
+        var $clicked_element = $(this);
+        $clicked_element.prop('disabled', true);
+        $('.deal_btn').prop('disabled', false);
+        if($first_button.length != 0) {
+          var assigned_value = $clicked_element.data('assigned_value');
+          $clicked_element.addClass('selected');
+          $clicked_element.css('background-color', 'rgb(224, 224, 41)');
+          $checkbox = $('#' + assigned_value);
+          if(assigned_value == '0.01') {
+            $checkbox = $('#' + 'first');
+          }
+          $checkbox.prop('checked', true);
+          $clicked_element.text(assigned_value);
+          total_value = total_value - assigned_value;
+          var approx_value = Math.floor( 0.9 * total_value);
+          $('.offer_container input[type=textbox').val(approx_value);
+        }
+        else {
+          $clicked_element.addClass('first_button');
+          $clicked_element.css('background-color', 'rgb(41, 56, 224)');
+        }
+      });
+
+      $(document).on('click', '.deal_btn', function() {
+        $first_button = $('.first_button');
+        value = $first_button.data('assigned_value');
+        $first_button.val(value);
+        $('.btn-lg').prop('disabled', true);
+        if($('.selected').length == 0) {
+          alert('The selected box content is: $' + value + '. Press "Start Game" to begin again.');  
+        }
+        else {
+          offer_amount = $('.offer_container input[type=textbox]').val();
+          alert('Congratulations! you won $' + offer_amount + '. You can restart the game if you like by clicking "Start Game" button.');
+        }
+      });
+
+      $(document).on('click', '.start_game_btn', function() {
+        var $game_buttons = $('.button_container > .btn');
+        var $checkboxs = $('.checkbox_container > input[type=checkbox]');
+        var $offer_box = $('.offer_container input[type=textbox]');
+        $game_buttons.each(function(index) {
+          var $current_element = $($game_buttons[index]);
+          $current_element.removeClass('selected');
+          $current_element.prop('disabled', false);
+          $current_element.removeClass('first_button');
+          $current_element.css('background-color', '#2aabd2');
+        });
+        $game_buttons.removeClass('disabled');
+        $game_buttons.removeClass('selected');
+        $game_buttons.removeClass('first_button');
+        $checkboxs.prop('checked', false);
+        $offer_box.val('');
+        assign_values();
+      });
     });
   </script>
   <style>
-    .instructions, .start_game_btn {
+    .instructions {
       margin-left: 20%;
+    }
+
+    .offer_container {
+      margin-top: 5%;
+    }
+
+    .selected {
+      background-color: rgb(224, 224, 41);
+    }
+
+    .first_button {
+      background-color: rgb(41, 56, 224); 
     }
 
     h1 {
       text-align: center;
+    }
+
+    .clear {
+      clear: both;
     }
 
     .game_container {
@@ -83,6 +198,23 @@
 
     .button_container {
       padding: 3%;
+      height: 300px;
+      width: 635px;
+      float: left;
+      margin-left: 10%;
+    }
+
+    .checkbox_container {
+      display: inline-block;
+      text-align: left;
+      padding: 3%;
+      float: left;
+    }
+
+    .btn-lg {
+      width: 100px;
+      height: 5em;
+      margin: 5px;
     }
   </style>
 </html>
